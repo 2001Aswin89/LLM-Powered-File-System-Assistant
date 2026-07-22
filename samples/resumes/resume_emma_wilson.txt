@@ -1,0 +1,28 @@
+Emma Wilson
+
+Frontend Developer
+
+Email: emma@email.com
+
+Professional Summary
+
+Frontend developer specializing in React, TypeScript, Redux, HTML, CSS, and responsive web applications.
+
+Skills
+
+React
+TypeScript
+Redux
+JavaScript
+HTML
+CSS
+Git
+
+Experience
+
+Frontend Developer
+Creative Apps Ltd.
+
+- Built reusable React components.
+- Improved Lighthouse performance scores.
+- Worked with REST APIs.

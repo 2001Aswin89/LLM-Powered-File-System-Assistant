@@ -1,0 +1,35 @@
+John Doe
+
+Software Engineer
+
+Email: john.doe@email.com
+Phone: +1-555-123-4567
+
+Professional Summary
+
+Backend Software Engineer with 5 years of experience developing REST APIs using Python, Flask, and FastAPI. Experienced with PostgreSQL, Docker, Git, AWS, and CI/CD pipelines.
+
+Skills
+
+Python
+FastAPI
+Flask
+PostgreSQL
+Docker
+AWS
+Git
+REST APIs
+
+Experience
+
+Software Engineer
+ABC Technologies
+2021 - Present
+
+- Developed scalable REST APIs.
+- Improved API response times by 35%.
+- Built Docker-based deployment pipelines.
+
+Education
+
+Bachelor of Science in Computer Science

@@ -1,0 +1,25 @@
+Raj Patel
+
+Full Stack Developer
+
+Professional Summary
+
+Full Stack Engineer experienced in Node.js, Express, MongoDB, React, Docker, and Kubernetes.
+
+Skills
+
+Node.js
+Express
+MongoDB
+React
+Docker
+Kubernetes
+GitHub Actions
+
+Experience
+
+XYZ Software
+
+- Designed backend services.
+- Implemented authentication.
+- Automated deployments.
