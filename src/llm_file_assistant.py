@@ -14,14 +14,16 @@ from fs_tools import (
 
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
+def get_openai_client():
+    api_key = os.getenv("OPENAI_API_KEY")
 
-if not api_key:
-    raise RuntimeError(
-        "OPENAI_API_KEY not found. Please set it in your .env file."
-    )
+    if not api_key:
+        raise RuntimeError(
+            "OPENAI_API_KEY not found. Please set it in your .env file."
+        )
 
-client = OpenAI(api_key=api_key)
+    return OpenAI(api_key=api_key)
+
 MODEL_NAME = "gpt-4o-mini"
 
 
@@ -223,6 +225,7 @@ def run_chat(user_query: str) -> None:
     while True:
 
         try:
+            client = get_openai_client()
             response = client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=messages,
