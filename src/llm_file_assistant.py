@@ -15,8 +15,11 @@ from fs_tools import (
 
 
 load_dotenv()
-LLM_PROVIDER = "gemini"      # openai | gemini
-MODEL_NAME = "gemini-2.5-flash"
+# LLM_PROVIDER = "gemini"      # openai | gemini
+LLM_PROVIDER = "openai"     # openai | gemini
+MODEL_NAME = "gpt-4o-mini"
+# MODEL_NAME = "gemini-2.5-flash"
+
 
 def get_llm_client():
     """
@@ -215,8 +218,22 @@ def execute_tool(tool_name: str, arguments: dict) -> dict:
         "metadata": {},
         "error": f"Unknown tool: {tool_name}",
     }
+def run_chat(user_query: str):
+    if LLM_PROVIDER == "openai":
+        return run_openai_chat(user_query)
 
-def run_chat(user_query: str) -> None:
+    elif LLM_PROVIDER == "gemini":
+        return run_gemini_chat(user_query)
+
+    raise ValueError(
+        f"Unsupported provider: {LLM_PROVIDER}"
+    )
+def run_gemini_chat(user_query: str):
+    raise NotImplementedError(
+        "Gemini support is not implemented yet."
+    )
+
+def run_openai_chat(user_query: str) -> None:
     """
     Send the user's query to the LLM and execute any requested tools.
 
