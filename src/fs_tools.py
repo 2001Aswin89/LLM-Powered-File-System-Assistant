@@ -151,7 +151,25 @@ def write_file(filepath: str, content: str) -> dict:
             "error": str | None,
         }
     """
-    raise NotImplementedError
+    try:
+        path = Path(filepath)
+
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        path.write_text(content, encoding="utf-8")
+
+        return {
+            "success": True,
+            "path": str(path.resolve()),
+            "error": None,
+        }
+
+    except Exception as exc:
+        return {
+            "success": False,
+            "path": filepath,
+            "error": str(exc),
+        }
 
 
 def search_in_file(filepath: str, keyword: str) -> dict:
@@ -169,4 +187,33 @@ def search_in_file(filepath: str, keyword: str) -> dict:
             "count": int,
         }
     """
-    raise NotImplementedError
+    file_result = read_file(filepath)
+
+    if not file_result["success"]:
+        return {
+            "success": False,
+            "matches": [],
+            "count": 0,
+        }
+
+    keyword_lower = keyword.lower()
+    matches = []
+
+    lines = file_result["content"].splitlines()
+
+    for line_number, line in enumerate(lines, start=1):
+
+        if keyword_lower in line.lower():
+
+            matches.append(
+                {
+                    "line": line_number,
+                    "context": line.strip(),
+                }
+            )
+
+    return {
+        "success": True,
+        "matches": matches,
+        "count": len(matches),
+    }
