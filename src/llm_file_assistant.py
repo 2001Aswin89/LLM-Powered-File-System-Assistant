@@ -15,10 +15,10 @@ from fs_tools import (
 
 
 load_dotenv()
-# LLM_PROVIDER = "gemini"      # openai | gemini
-LLM_PROVIDER = "openai"     # openai | gemini
-MODEL_NAME = "gpt-4o-mini"
-# MODEL_NAME = "gemini-2.5-flash"
+LLM_PROVIDER = "gemini"      # openai | gemini
+# LLM_PROVIDER = "openai"     # openai | gemini
+# MODEL_NAME = "gpt-4o-mini"
+MODEL_NAME =  "gemini-3.1-flash-lite" #"gemini-flash-latest"
 
 
 def get_llm_client():
@@ -135,6 +135,13 @@ TOOLS = [
     },
 ]
 
+GEMINI_TOOLS = [
+    read_file,
+    list_files,
+    write_file,
+    search_in_file,
+]
+
 def execute_tool(tool_name: str, arguments: dict) -> dict:
     """
     Execute the requested tool from fs_tools.py.
@@ -228,10 +235,97 @@ def run_chat(user_query: str):
     raise ValueError(
         f"Unsupported provider: {LLM_PROVIDER}"
     )
-def run_gemini_chat(user_query: str):
-    raise NotImplementedError(
-        "Gemini support is not implemented yet."
+
+SYSTEM_PROMPT = """
+You are a Resume File Assistant.
+
+You help users interact with files using the available filesystem tools.
+
+Rules:
+- Always use the provided tools for any file operation.
+- Never make up file names or file contents.
+- If the user asks to list resumes or search resumes without specifying a directory,
+  assume "samples/resumes".
+- Be concise and helpful.
+- If a tool returns an error, explain it to the user.
+"""
+
+# Conversation history
+messages = []
+
+def run_gemini_chat(user_query):
+    """
+    Runs a conversation with Gemini while maintaining
+    conversation history and allowing tool calling.
+    """
+
+    global messages
+
+    client = get_llm_client()
+
+    # Add current user message
+    messages.append(
+        {
+            "role": "user",
+            "parts": [
+                {
+                    "text": user_query,
+                }
+            ],
+        }
     )
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=messages,
+            config={
+                "system_instruction": SYSTEM_PROMPT,
+                "tools": GEMINI_TOOLS,
+            },
+        )
+
+    except Exception as e:
+        print(f"\nGemini Error:\n{e}\n")
+        return None
+
+    assistant_response = response.text
+
+    print("\nAssistant:\n")
+    print(assistant_response)
+
+    # Save assistant reply for future context
+    messages.append(
+        {
+            "role": "model",
+            "parts": [
+                {
+                    "text": assistant_response,
+                }
+            ],
+        }
+    )
+
+    return assistant_response
+    client = get_llm_client()
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=user_query,
+            config={
+                "tools": GEMINI_TOOLS,
+            },
+        )
+
+    except Exception as e:
+        print(f"\nGemini Error:\n{e}\n")
+        return
+
+
+    print("\nAssistant:\n")
+    print(response.text)
+
 
 def run_openai_chat(user_query: str) -> None:
     """
