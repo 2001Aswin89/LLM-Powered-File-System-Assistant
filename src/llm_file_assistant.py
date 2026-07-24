@@ -131,22 +131,59 @@ def execute_tool(tool_name: str, arguments: dict) -> dict:
         return read_file(filepath)
 
     if tool_name == "list_files":
+        directory = arguments.get("directory")
+
+        if not directory:
+            return {
+                "success": False,
+                "error": "Missing required argument: directory",
+            }
         return list_files(
-            arguments["directory"],
+            directory,
             arguments.get("extension"),
-        )
+        )    
 
     if tool_name == "write_file":
+        filepath = arguments.get("filepath")
+        content = arguments.get("content")
+
+        if not filepath:
+            return {
+            "success": False,
+            "error": "Missing required argument: filepath",
+        }
+
+        if content is None:
+            return {
+                "success": False,
+                "error": "Missing required argument: content",
+            }
+
         return write_file(
-            arguments["filepath"],
-            arguments["content"],
+            filepath,
+            content,
         )
 
     if tool_name == "search_in_file":
-        return search_in_file(
-            arguments["filepath"],
-            arguments["keyword"],
-        )
+        filepath = arguments.get("filepath")
+        keyword = arguments.get("keyword")
+
+        if not filepath:
+            return {
+                "success": False,
+            "error": "Missing required argument: filepath",
+        }
+
+        if not keyword:
+            return {
+                "success": False,
+                "error": "Missing required argument: keyword",
+            }
+
+            return search_in_file(
+                filepath,
+                keyword,
+            )
 
     return {
         "success": False,
@@ -163,7 +200,7 @@ def run_chat(user_query: str) -> None:
         user_query: Natural language query from the user.
     """
 
-    messages = [
+    messages: list[dict] = [
         {
             "role": "system",
             "content": (
@@ -185,12 +222,16 @@ def run_chat(user_query: str) -> None:
 
     while True:
 
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=messages,
-            tools=TOOLS,
-            tool_choice="auto",
-        )
+        try:
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=messages,
+                tools=TOOLS,
+                tool_choice="auto",
+            )
+        except Exception as exc:
+            print(f"\nOpenAI API Error: {exc}")
+            return
 
         message = response.choices[0].message
 
@@ -280,13 +321,7 @@ def main() -> None:
             print("\n\nInterrupted. Goodbye!")
             break
 
-        try:
-            response = client.chat.completions.create(
-                ...
-            )
-        except Exception as exc:
-            print(f"\nOpenAI API Error: {exc}")
-            return
+        
 
 
 if __name__ == "__main__":
