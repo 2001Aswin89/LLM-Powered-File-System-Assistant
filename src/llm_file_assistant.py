@@ -14,7 +14,15 @@ from fs_tools import (
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.getenv("OPENAI_API_KEY")
+
+if not api_key:
+    raise RuntimeError(
+        "OPENAI_API_KEY not found. Please set it in your .env file."
+    )
+
+client = OpenAI(api_key=api_key)
+MODEL_NAME = "gpt-4o-mini"
 
 
 TOOLS = [
@@ -112,7 +120,15 @@ def execute_tool(tool_name: str, arguments: dict) -> dict:
         Dictionary returned by the corresponding fs_tools function.
     """
     if tool_name == "read_file":
-        return read_file(arguments["filepath"])
+        filepath = arguments.get("filepath")
+
+        if not filepath:
+            return {
+                "success": False,
+                "error": "Missing required argument: filepath",
+            }
+
+        return read_file(filepath)
 
     if tool_name == "list_files":
         return list_files(
@@ -134,10 +150,12 @@ def execute_tool(tool_name: str, arguments: dict) -> dict:
 
     return {
         "success": False,
+        "content": "",
+        "metadata": {},
         "error": f"Unknown tool: {tool_name}",
     }
 
-    def run_chat(user_query: str) -> None:
+def run_chat(user_query: str) -> None:
     """
     Send the user's query to the LLM and execute any requested tools.
 
@@ -149,9 +167,14 @@ def execute_tool(tool_name: str, arguments: dict) -> dict:
         {
             "role": "system",
             "content": (
-                "You are a helpful resume file assistant. "
-                "Use the available tools whenever filesystem "
-                "operations are required."
+                "You are a Resume File Assistant.\n"
+                "\n"
+                "Rules:\n"
+                "- Always use the available tools for filesystem operations.\n"
+                "- Never invent filenames.\n"
+                "- Never invent file contents.\n"
+                "- Base every answer only on tool outputs.\n"
+                "- If a tool reports an error, explain it to the user.\n"
             ),
         },
         {
@@ -163,7 +186,7 @@ def execute_tool(tool_name: str, arguments: dict) -> dict:
     while True:
 
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL_NAME,
             messages=messages,
             tools=TOOLS,
             tool_choice="auto",
@@ -176,18 +199,40 @@ def execute_tool(tool_name: str, arguments: dict) -> dict:
             if message.content:
                 print("\nAssistant:\n")
                 print(message.content)
+            else:
+                print("\nAssistant returned no response.")
 
             return
 
-        messages.append(message)
+        messages.append(
+            {
+                "role": "assistant",
+                "content": message.content,
+                "tool_calls": [
+                    {
+                        "id": tool_call.id,
+                        "type": tool_call.type,
+                        "function": {
+                            "name": tool_call.function.name,
+                            "arguments": tool_call.function.arguments,
+                        },
+                    }
+                    for tool_call in message.tool_calls
+                ],
+            }
+        )
 
         for tool_call in message.tool_calls:
 
             tool_name = tool_call.function.name
 
-            arguments = json.loads(
-                tool_call.function.arguments
-            )
+            try:
+                arguments = json.loads(tool_call.function.arguments)
+            except json.JSONDecodeError:
+                print(
+                    f"Failed to parse tool arguments for {tool_name}."
+                )
+                continue
 
             tool_result = execute_tool(
                 tool_name,
@@ -209,6 +254,11 @@ def main() -> None:
 
     print("=" * 60)
     print("Resume File Assistant")
+    print("\nSupported operations:")
+    print("- Read a file")
+    print("- List files")
+    print("- Search within files")
+    print("- Write text files")
     print("Type 'exit' or 'quit' to close the assistant.")
     print("=" * 60)
 
@@ -230,8 +280,13 @@ def main() -> None:
             print("\n\nInterrupted. Goodbye!")
             break
 
+        try:
+            response = client.chat.completions.create(
+                ...
+            )
         except Exception as exc:
-            print(f"\nError: {exc}")
+            print(f"\nOpenAI API Error: {exc}")
+            return
 
 
 if __name__ == "__main__":
