@@ -98,7 +98,7 @@ def test_run_chat_final_response(mocker):
     fake_client.chat.completions.create.return_value = response
 
     mocker.patch(
-        "llm_file_assistant.get_openai_client",
+        "llm_file_assistant.get_llm_client",
         return_value=fake_client,
     )
 
@@ -142,7 +142,7 @@ def test_run_chat_tool_call(mocker):
     ]
 
     mocker.patch(
-        "llm_file_assistant.get_openai_client",
+        "llm_file_assistant.get_llm_client",
         return_value=fake_client,
     )
 
@@ -174,7 +174,7 @@ def test_run_chat_api_error(mocker):
     )
 
     mocker.patch(
-        "llm_file_assistant.get_openai_client",
+        "llm_file_assistant.get_llm_client",
         return_value=fake_client,
     )
 

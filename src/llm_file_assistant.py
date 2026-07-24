@@ -3,6 +3,8 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from google import genai
+
 
 from fs_tools import (
     list_files,
@@ -13,18 +15,38 @@ from fs_tools import (
 
 
 load_dotenv()
+LLM_PROVIDER = "gemini"      # openai | gemini
+MODEL_NAME = "gemini-2.5-flash"
 
-def get_openai_client():
-    api_key = os.getenv("OPENAI_API_KEY")
+def get_llm_client():
+    """
+    Returns the configured LLM client.
+    """
 
-    if not api_key:
-        raise RuntimeError(
-            "OPENAI_API_KEY not found. Please set it in your .env file."
-        )
+    if LLM_PROVIDER == "openai":
+        api_key = os.getenv("OPENAI_API_KEY")
 
-    return OpenAI(api_key=api_key)
+        if not api_key:
+            raise RuntimeError(
+                "OPENAI_API_KEY not found."
+            )
 
-MODEL_NAME = "gpt-4o-mini"
+        return OpenAI(api_key=api_key)
+
+    elif LLM_PROVIDER == "gemini":
+        api_key = os.getenv("GEMINI_API_KEY")
+
+        if not api_key:
+            raise RuntimeError(
+                "GEMINI_API_KEY not found."
+            )
+
+        return genai.Client(api_key=api_key)
+
+    raise ValueError(
+        f"Unsupported provider: {LLM_PROVIDER}"
+    )
+
 
 
 TOOLS = [
@@ -225,7 +247,7 @@ def run_chat(user_query: str) -> None:
     while True:
 
         try:
-            client = get_openai_client()
+            client = get_llm_client()
             response = client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=messages,
