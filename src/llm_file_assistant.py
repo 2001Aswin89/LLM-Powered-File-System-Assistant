@@ -180,10 +180,10 @@ def execute_tool(tool_name: str, arguments: dict) -> dict:
                 "error": "Missing required argument: keyword",
             }
 
-            return search_in_file(
-                filepath,
-                keyword,
-            )
+        return search_in_file(
+            filepath,
+            keyword,
+        )
 
     return {
         "success": False,
