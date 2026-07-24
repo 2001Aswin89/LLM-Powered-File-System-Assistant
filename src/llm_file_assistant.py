@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from google import genai
+from google.genai import types
 
 
 from fs_tools import (
@@ -277,13 +278,16 @@ def run_gemini_chat(user_query):
 
     try:
         response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=messages,
-            config={
-                "system_instruction": SYSTEM_PROMPT,
-                "tools": GEMINI_TOOLS,
-            },
-        )
+        model=MODEL_NAME,
+        contents=messages,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            tools=GEMINI_TOOLS,
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                disable=False
+            ),
+        ),
+    )
 
     except Exception as e:
         print(f"\nGemini Error:\n{e}\n")
@@ -307,24 +311,7 @@ def run_gemini_chat(user_query):
     )
 
     return assistant_response
-    client = get_llm_client()
-
-    try:
-        response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=user_query,
-            config={
-                "tools": GEMINI_TOOLS,
-            },
-        )
-
-    except Exception as e:
-        print(f"\nGemini Error:\n{e}\n")
-        return
-
-
-    print("\nAssistant:\n")
-    print(response.text)
+    
 
 
 def run_openai_chat(user_query: str) -> None:

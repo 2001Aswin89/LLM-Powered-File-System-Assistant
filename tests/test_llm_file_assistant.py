@@ -1,5 +1,6 @@
 import json
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
+import src.llm_file_assistant as assistant
 
 import pytest
 
