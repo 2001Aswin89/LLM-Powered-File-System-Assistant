@@ -1,6 +1,8 @@
 openai
+google-genai
 python-docx
 pypdf
 python-dotenv
 pytest
 pytest-mock
+PyMuPDF

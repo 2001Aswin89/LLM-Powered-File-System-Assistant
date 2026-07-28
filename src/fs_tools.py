@@ -38,8 +38,10 @@ def read_file(filepath: str) -> dict:
 
         elif extension == ".docx":
             document = Document(path)
+
             content = "\n".join(
-                paragraph.text for paragraph in document.paragraphs
+                paragraph.text
+                for paragraph in document.paragraphs
             )
 
         elif extension == ".pdf":
@@ -48,10 +50,22 @@ def read_file(filepath: str) -> dict:
 
             for page in reader.pages:
                 text = page.extract_text()
-                if text:
-                    pages.append(text)
 
-            content = "\n".join(pages)
+                if text:
+                    pages.append(text.strip())
+
+            content = "\n\n".join(pages)
+
+            if not content.strip():
+                return {
+                    "success": False,
+                    "content": "",
+                    "metadata": {},
+                    "error": (
+                        "PDF was opened successfully, but no extractable "
+                        "text was found."
+                    )
+                }
 
         else:
             return {
@@ -85,8 +99,7 @@ def read_file(filepath: str) -> dict:
             "metadata": {},
             "error": str(exc)
         }
-
-
+        
 def list_files(directory: str, extension: str = None) -> list:
     """
     List files in a directory.
